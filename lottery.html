@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元旦幸运转盘抽奖</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "幼圆", "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background-color: #fff9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .lottery-container {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        .lottery-title {
+            font-size: 28px;
+            color: #ff6b8b;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(255, 107, 139, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .lottery-title span {
+            animation: bounce 2s ease infinite;
+        }
+        .lottery-title span:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+        .wheel-wrapper {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+        }
+        .lottery-wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ffd6e0 0deg 60deg,
+                #ffb6c1 60deg 120deg,
+                #ff8fb1 120deg 180deg,
+                #ff6b8b 180deg 240deg,
+                #ff7a9c 240deg 300deg,
+                #ff9a9e 300deg 360deg
+            );
+            position: relative;
+            border: 8px solid #fff;
+            box-shadow: 0 8px 20px rgba(255, 107, 139, 0.2);
+            transition: transform 5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .wheel-item {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transform-origin: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+            padding-top: 20px;
+        }
+        .wheel-item:nth-child(1) { transform: rotate(0deg); }
+        .wheel-item:nth-child(2) { transform: rotate(60deg); }
+        .wheel-item:nth-child(3) { transform: rotate(120deg); }
+        .wheel-item:nth-child(4) { transform: rotate(180deg); }
+        .wheel-item:nth-child(5) { transform: rotate(240deg); }
+        .wheel-item:nth-child(6) { transform: rotate(300deg); }
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6b8b 0%, #ff5a7f 100%);
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 10px rgba(255, 107, 139, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        .wheel-center:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 6px 15px rgba(255, 107, 139, 0.4);
+        }
+        .wheel-center:active {
+            transform: translate(-50%, -50%) scale(0.98);
+        }
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid #ffd6e0;
+            z-index: 1;
+            filter: drop-shadow(0 2px 2px rgba(255, 107, 139, 0.2));
+        }
+        .prize-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .prize-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+            display: flex;
+        }
+        .modal-content {
+            background: #fff;
+            width: 80%;
+            max-width: 350px;
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            border: 5px solid #ffd6e0;
+            box-shadow: 0 10px 30px rgba(255, 107, 139, 0.3);
+            transform: scale(0.8) translateY(-20px);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .prize-modal.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+        .modal-title {
+            font-size: 22px;
+            color: #ff6b8b;
+            margin-bottom: 15px;
+        }
+        .modal-prize {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff5a7f;
+            margin: 15px 0;
+            animation: flash 1s ease infinite alternate;
+        }
+        .modal-btn {
+            background: linear-gradient(135deg, #ff8fb1 0%, #ff6b8b 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(255, 107, 139, 0.2);
+            transition: all 0.3s ease;
+        }
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 107, 139, 0.3);
+        }
+        @media (max-width: 400px) {
+            .wheel-wrapper {
+                width: 250px;
+                height: 250px;
+            }
+            .wheel-center {
+                width: 70px;
+                height: 70px;
+                font-size: 14px;
+            }
+            .lottery-title {
+                font-size: 24px;
+            }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        @keyframes flash {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; text-shadow: 0 0 10px #ff6b8b; }
+        }
+    </style>
+</head>
+<body>
+    <div class="lottery-container">
+        <h2 class="lottery-title">✨ 元旦幸运转盘 ✨</h2>
+        <div class="wheel-wrapper">
+            <div class="wheel-pointer"></div>
+            <div class="lottery-wheel" id="lotteryWheel">
+                <div class="wheel-item">🎁 一夜暴富</div>
+                        <div class="wheel-item">🌸 不劳而获</div>
+                        <div class="wheel-item">🍬 逢考必过</div>
+                        <div class="wheel-item">🥤 心想事成</div>
+                        <div class="wheel-item">🎀 财源广进</div>
+                        <div class="wheel-item">✨ 桃花朵朵</div>
+                        <div class="wheel-center" id="lotteryBtn">点击抽奖</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="prize-modal" id="prizeModal">
+        <div class="modal-content">
+            <div class="modal-title">🎉 恭喜中奖啦 🎉</div>
+            <p>你抽到了：</p>
+            <p class="modal-prize" id="prizeName">🎁 小零食</p>
+            <button class="modal-btn" id="closeModal">收下好运 ✨</button>
+        </div>
+    </div>
+
+    <script>
+        const lotteryWheel = document.getElementById('lotteryWheel');
+        const lotteryBtn = document.getElementById('lotteryBtn');
+        const prizeModal = document.getElementById('prizeModal');
+        const prizeName = document.getElementById('prizeName');
+        const closeModal = document.getElementById('closeModal');
+        
+      const prizes = ['🎁 一夜暴富', '🌸 不劳而获', '🍬 逢考必过', '🥤 心想事成', '🎀 财源广进', '✨ 桃花朵朵'];
+        let isRotating = false;
+
+        lotteryBtn.addEventListener('click', () => {
+            if (isRotating) return;
+            isRotating = true;
+            
+            const randomDeg = 360 * (5 + Math.random() * 5) + Math.random() * 360;
+            lotteryWheel.style.transform = `rotate(${randomDeg}deg)`;
+            
+            setTimeout(() => {
+                let finalDeg = 360 - (randomDeg % 360);
+                if (finalDeg === 360) finalDeg = 0;
+                const prizeIndex = Math.floor(finalDeg / 60) % 6;
+                const winPrize = prizes[prizeIndex];
+                
+                prizeName.textContent = winPrize;
+                prizeModal.classList.add('active');
+                
+                isRotating = false;
+            }, 5000);
+        });
+
+        closeModal.addEventListener('click', () => {
+            prizeModal.classList.remove('active');
+            setTimeout(() => {
+                lotteryWheel.style.transition = 'none';
+                lotteryWheel.style.transform = 'rotate(0deg)';
+                setTimeout(() => {
+                    lotteryWheel.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                }, 50);
+            }, 300);
+        });
+    </script>
+</body>
+</html>
