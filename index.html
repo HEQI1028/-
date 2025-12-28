@@ -2,20 +2,22 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>元旦幸运转盘 | 可爱抽奖</title>
-    <!-- 适配GitHub Pages的SEO和缓存设置 -->
-    <meta name="description" content="可爱风格元旦抽奖转盘，萌系设计，交互友好">
-    <meta name="author" content="Lucky Draw">
-    <style type="text/css">
-        /* 基础重置 - 适配所有浏览器 */
+    <title>幸运转盘 | 萌系抽奖</title>
+    <!-- GitHub Pages 缓存优化 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        /* 基础重置 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "幼圆", "Microsoft YaHei", "PingFang SC", sans-serif;
+            font-family: "幼圆", "PingFang SC", "Microsoft YaHei", sans-serif;
         }
+
         body {
             background-color: #fff9fa;
             min-height: 100vh;
@@ -24,38 +26,38 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            -webkit-tap-highlight-color: transparent; /* 去除移动端点击高亮 */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
-        /* 页面容器 - 适配不同屏幕 */
-        .page-container {
+
+        /* 页面容器 */
+        .container {
             text-align: center;
             max-width: 500px;
             width: 100%;
-            padding: 10px;
         }
-        /* 萌系标题 - 带呼吸动画 */
-        .lottery-title {
+
+        /* 标题样式 */
+        .title {
             font-size: 28px;
             color: #ff6b8b;
             margin-bottom: 30px;
             text-shadow: 0 2px 4px rgba(255, 107, 139, 0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
             animation: breathe 3s ease infinite alternate;
         }
-        /* 转盘容器 - 相对定位保证指针层级 */
+
+        /* 转盘容器 - 精准定位基准 */
         .wheel-wrapper {
             position: relative;
-            width: 300px;
-            height: 300px;
-            margin: 0 auto 30px;
-            /* 防止移动端点击缩放 */
-            touch-action: none;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto 35px;
+            /* 防止容器偏移 */
+            transform: translateZ(0);
         }
-        /* 转盘主体 - 萌系渐变扇区 */
-        .lottery-wheel {
+
+        /* 转盘主体 */
+        .wheel {
             width: 100%;
             height: 100%;
             border-radius: 50%;
@@ -67,38 +69,71 @@
                 #ff7a9c 240deg 300deg,
                 #ff9a9e 300deg 360deg
             );
-            position: relative;
             border: 8px solid #fff;
             box-shadow: 0 8px 20px rgba(255, 107, 139, 0.2);
+            position: relative;
+            transform-origin: center center;
             transition: transform 5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            transform-origin: center center; /* 明确旋转中心 */
+            overflow: hidden; /* 禁止文字溢出 */
         }
-        /* 转盘奖品文字 - 精准对齐扇区 */
-        .wheel-item {
+
+        /* 奖品文字 - 彻底修复错位，精准居中 */
+        .prize-item {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            top: 0;
+            left: 50%;
+            /* 旋转原点：转盘中心（X:0 = 160-160, Y:160） */
+            transform-origin: 0px 160px;
+            /* 文字容器尺寸：刚好适配扇形宽度 */
+            width: 150px;
+            height: 160px;
             text-align: center;
-            transform-origin: center;
             color: #fff;
             font-weight: bold;
             font-size: 16px;
-            padding-top: 20px;
+            line-height: 1.2;
+            /* 文字垂直居中在容器内 */
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 25px;
+            /* 消除默认间距导致的错位 */
+            margin: 0;
+            white-space: nowrap;
+            text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
         }
-        .wheel-item:nth-child(1) { transform: rotate(0deg); }   /* 不劳而获 */
-        .wheel-item:nth-child(2) { transform: rotate(60deg); }  /* 逢考必过 */
-        .wheel-item:nth-child(3) { transform: rotate(120deg); } /* 心想事成 */
-        .wheel-item:nth-child(4) { transform: rotate(180deg); } /* 财源广进 */
-        .wheel-item:nth-child(5) { transform: rotate(240deg); } /* 桃花朵朵 */
-        .wheel-item:nth-child(6) { transform: rotate(300deg); } /* 谢谢参与 */
-        /* 转盘中心按钮 - 萌系泡泡感 */
-        .wheel-center {
+
+        /* 每个奖品的旋转角度（精准对齐扇形正中央） */
+        .prize-item:nth-child(1) { transform: rotate(30deg) translateX(-50%); }   /* 一夜暴富 - 0-60°中心 */
+        .prize-item:nth-child(2) { transform: rotate(90deg) translateX(-50%); }  /* 不劳而获 - 60-120°中心 */
+        .prize-item:nth-child(3) { transform: rotate(150deg) translateX(-50%); } /* 逢考必过 - 120-180°中心 */
+        .prize-item:nth-child(4) { transform: rotate(210deg) translateX(-50%); } /* 心想事成 - 180-240°中心 */
+        .prize-item:nth-child(5) { transform: rotate(270deg) translateX(-50%); } /* 财源广进 - 240-300°中心 */
+        .prize-item:nth-child(6) { transform: rotate(330deg) translateX(-50%); } /* 桃花朵朵 - 300-360°中心 */
+
+        /* 转盘指针 */
+        .pointer {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 16px solid transparent;
+            border-right: 16px solid transparent;
+            border-bottom: 28px solid #ffd6e0;
+            z-index: 1;
+            filter: drop-shadow(0 2px 2px rgba(255, 107, 139, 0.2));
+        }
+
+        /* 抽奖按钮 */
+        .draw-btn {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
+            width: 85px;
+            height: 85px;
             background: linear-gradient(135deg, #ff6b8b 0%, #ff5a7f 100%);
             border-radius: 50%;
             border: 4px solid #fff;
@@ -108,34 +143,24 @@
             justify-content: center;
             color: #fff;
             font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
             z-index: 2;
+            user-select: none;
             transition: all 0.3s ease;
-            user-select: none; /* 禁止文字选中 */
         }
-        .wheel-center:hover {
+
+        .draw-btn:hover {
             transform: translate(-50%, -50%) scale(1.05);
             box-shadow: 0 6px 15px rgba(255, 107, 139, 0.4);
         }
-        .wheel-center:active {
+
+        .draw-btn:active {
             transform: translate(-50%, -50%) scale(0.98);
         }
-        /* 萌系指针 - 软乎乎的三角设计 */
-        .wheel-pointer {
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-bottom: 25px solid #ffd6e0;
-            z-index: 1;
-            filter: drop-shadow(0 2px 2px rgba(255, 107, 139, 0.2));
-        }
-        /* 中奖弹窗 - 弹跳入场 */
-        .prize-modal {
+
+        /* 中奖弹窗 */
+        .modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -145,17 +170,19 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            z-index: 999;
             padding: 20px;
         }
-        .prize-modal.active {
+
+        .modal.show {
             display: flex;
             animation: fadeIn 0.3s ease;
         }
+
         .modal-content {
             background: #fff;
-            width: 80%;
-            max-width: 350px;
+            width: 85%;
+            max-width: 360px;
             border-radius: 20px;
             padding: 30px 20px;
             text-align: center;
@@ -164,15 +191,17 @@
             transform: scale(0.8) translateY(-20px);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .prize-modal.active .modal-content {
+
+        .modal.show .modal-content {
             transform: scale(1) translateY(0);
         }
-        /* 弹窗内容样式 */
+
         .modal-title {
             font-size: 22px;
             color: #ff6b8b;
             margin-bottom: 15px;
         }
+
         .modal-prize {
             font-size: 20px;
             font-weight: bold;
@@ -180,7 +209,8 @@
             margin: 15px 0;
             animation: flash 1s ease infinite alternate;
         }
-        .modal-btn {
+
+        .modal-close {
             background: linear-gradient(135deg, #ff8fb1 0%, #ff6b8b 100%);
             color: #fff;
             border: none;
@@ -189,159 +219,160 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 15px;
             box-shadow: 0 4px 10px rgba(255, 107, 139, 0.2);
             transition: all 0.3s ease;
         }
-        .modal-btn:hover {
+
+        .modal-close:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(255, 107, 139, 0.3);
         }
-        /* 移动端适配 - 响应式调整 */
+
+        /* 移动端适配 - 同步修复错位 */
         @media (max-width: 400px) {
             .wheel-wrapper {
-                width: 250px;
-                height: 250px;
+                width: 280px;
+                height: 280px;
             }
-            .wheel-center {
-                width: 70px;
-                height: 70px;
+
+            .prize-item {
+                transform-origin: 0px 140px;
+                width: 130px;
+                height: 140px;
+                font-size: 14px;
+                padding-top: 22px;
+            }
+
+            .draw-btn {
+                width: 75px;
+                height: 75px;
                 font-size: 14px;
             }
-            .lottery-title {
+
+            .pointer {
+                border-left: 14px solid transparent;
+                border-right: 14px solid transparent;
+                border-bottom: 25px solid #ffd6e0;
+            }
+
+            .title {
                 font-size: 24px;
             }
-            .wheel-item {
-                font-size: 14px;
-                padding-top: 15px;
-            }
         }
-        /* 动画关键帧 - 流畅不卡顿 */
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        @keyframes flash {
-            0% { opacity: 0.8; text-shadow: 0 0 5px #ff6b8b; }
-            100% { opacity: 1; text-shadow: 0 0 10px #ff6b8b; }
-        }
+
+        /* 动画定义 */
         @keyframes breathe {
             0% { opacity: 0.9; transform: scale(0.98); }
             100% { opacity: 1; transform: scale(1); }
         }
+
         @keyframes fadeIn {
             0% { opacity: 0; }
             100% { opacity: 1; }
         }
+
+        @keyframes flash {
+            0% { opacity: 0.8; text-shadow: 0 0 5px #ff6b8b; }
+            100% { opacity: 1; text-shadow: 0 0 10px #ff6b8b; }
+        }
     </style>
 </head>
 <body>
-    <div class="page-container">
-        <!-- 萌系标题 -->
-        <h2 class="lottery-title">✨ 元旦幸运转盘 ✨</h2>
+    <div class="container">
+        <h1 class="title">✨ 幸运转盘 ✨</h1>
         
-        <!-- 转盘核心区域 -->
         <div class="wheel-wrapper">
-            <!-- 指针 -->
-            <div class="wheel-pointer"></div>
-            
-            <!-- 转盘 -->
-            <div class="lottery-wheel" id="lotteryWheel">
-                <!-- 奖品扇区 -->
-                <div class="wheel-item">🎁 不劳而获</div>
-                <div class="wheel-item">🌸 逢考必过</div>
-                <div class="wheel-item">🍬 心想事成</div>
-                <div class="wheel-item">🥤 财源广进</div>
-                <div class="wheel-item">🎀 桃花朵朵</div>
-                <div class="wheel-item">✨ 谢谢参与</div>
+            <div class="pointer"></div>
+            <div class="wheel" id="wheel">
+                <!-- 奖品列表（固定为指定内容） -->
+                <div class="prize-item">🎁 一夜暴富</div>
+                <div class="prize-item">🌸 不劳而获</div>
+                <div class="prize-item">🍬 逢考必过</div>
+                <div class="prize-item">🥤 心想事成</div>
+                <div class="prize-item">🎀 财源广进</div>
+                <div class="prize-item">✨ 桃花朵朵</div>
                 
-                <!-- 中心抽奖按钮 -->
-                <div class="wheel-center" id="lotteryBtn">
-                    点击抽奖
-                </div>
+                <div class="draw-btn" id="drawBtn">点击抽奖</div>
             </div>
         </div>
     </div>
 
     <!-- 中奖弹窗 -->
-    <div class="prize-modal" id="prizeModal">
+    <div class="modal" id="prizeModal">
         <div class="modal-content">
             <div class="modal-title">🎉 恭喜中奖啦 🎉</div>
             <p>你抽到了：</p>
-            <p class="modal-prize" id="prizeName">🎁 不劳而获</p>
-            <button class="modal-btn" id="closeModal">收下好运 ✨</button>
+            <p class="modal-prize" id="prizeName">🎁 一夜暴富</p>
+            <button class="modal-close" id="closeModal">收下好运 ✨</button>
         </div>
     </div>
 
-    <!-- 核心交互JS - 适配GitHub Pages，无外部依赖 -->
     <script>
-        // 全局变量初始化
-        const lotteryWheel = document.getElementById('lotteryWheel');
-        const lotteryBtn = document.getElementById('lotteryBtn');
+        // 核心元素获取
+        const wheel = document.getElementById('wheel');
+        const drawBtn = document.getElementById('drawBtn');
         const prizeModal = document.getElementById('prizeModal');
         const prizeName = document.getElementById('prizeName');
         const closeModal = document.getElementById('closeModal');
-        
-        // 奖品列表（与扇区一一对应）
-        const prizes = ['🎁 不劳而获', '🌸 逢考必过', '🍬 心想事成', '🥤 财源广进', '🎀 桃花朵朵', '✨ 谢谢参与'];
-        // 防止重复点击的锁
-        let isRotating = false;
 
-        // 抽奖核心逻辑 - 修复角度计算，确保指针与奖品匹配
-        lotteryBtn.addEventListener('click', () => {
-            if (isRotating) return; // 旋转中禁止重复点击
-            isRotating = true;
-            
-            // 随机生成旋转角度（5-10圈 + 随机停止位置）
+        // 奖品列表（与DOM一一对应）
+        const prizes = [
+            '🎁 一夜暴富',
+            '🌸 不劳而获',
+            '🍬 逢考必过',
+            '🥤 心想事成',
+            '🎀 财源广进',
+            '✨ 桃花朵朵'
+        ];
+
+        // 防止重复点击
+        let isSpinning = false;
+
+        // 抽奖逻辑
+        drawBtn.addEventListener('click', () => {
+            if (isSpinning) return;
+            isSpinning = true;
+
+            // 随机旋转角度（5-10圈 + 随机停止位置）
             const randomDeg = 360 * (5 + Math.random() * 5) + Math.random() * 360;
-            // 应用旋转动画
-            lotteryWheel.style.transform = `rotate(${randomDeg}deg)`;
-            
-            // 计算中奖结果（与旋转动画时长同步）
+            wheel.style.transform = `rotate(${randomDeg}deg)`;
+
+            // 计算中奖结果
             setTimeout(() => {
-                // 计算最终停留角度（0-360°）
                 let finalDeg = 360 - (randomDeg % 360);
-                if (finalDeg === 360) finalDeg = 0; // 处理360°等于0°的边界情况
-                
-                // 根据角度计算中奖奖品（每个扇区60°）
+                if (finalDeg === 360) finalDeg = 0;
                 const prizeIndex = Math.floor(finalDeg / 60) % 6;
                 const winPrize = prizes[prizeIndex];
-                
-                // 显示中奖弹窗
+
+                // 显示弹窗
                 prizeName.textContent = winPrize;
-                prizeModal.classList.add('active');
-                
-                // 解锁
-                isRotating = false;
-            }, 5000); // 与CSS中旋转动画时长保持一致
+                prizeModal.classList.add('show');
+                isSpinning = false;
+            }, 5000); // 与动画时长一致
         });
 
-        // 关闭中奖弹窗，重置转盘
+        // 关闭弹窗重置转盘
         closeModal.addEventListener('click', () => {
-            prizeModal.classList.remove('active');
-            // 重置转盘位置（无动画过渡）
+            prizeModal.classList.remove('show');
             setTimeout(() => {
-                lotteryWheel.style.transition = 'none';
-                lotteryWheel.style.transform = 'rotate(0deg)';
-                // 恢复动画过渡
+                wheel.style.transition = 'none';
+                wheel.style.transform = 'rotate(0deg)';
                 setTimeout(() => {
-                    lotteryWheel.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                    wheel.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.2, 1)';
                 }, 50);
             }, 300);
         });
 
-        // GitHub Pages适配：页面加载完成后初始化
+        // GitHub Pages 初始化
         window.addEventListener('load', () => {
-            // 确保转盘初始位置正确
-            lotteryWheel.style.transform = 'rotate(0deg)';
-            // 控制台提示部署成功
-            console.log('🎉 抽奖页面加载完成，可正常使用！');
+            wheel.style.transform = 'rotate(0deg)';
+            console.log('✅ 抽奖页面加载完成！');
         });
 
-        // 兼容移动端触摸事件
-        lotteryBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // 防止默认触摸行为
-            lotteryBtn.click(); // 触发点击事件
+        // 移动端触摸兼容
+        drawBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            drawBtn.click();
         });
     </script>
 </body>
